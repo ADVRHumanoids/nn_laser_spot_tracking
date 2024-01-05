@@ -1,4 +1,7 @@
 # nn_laser_spot_detection
+
+![logic scheme](./scheme/scheme.png)
+
 Detect (and practically track) in the ROS world a laser spot emitted from a common laser pointer.  
 
 
