@@ -1,75 +1,75 @@
 #include <nn_laser_spot_tracking/laser3DTracking.h>
 
-using NNLST:Laser3DTracking;
+using NNLST::Laser3DTracking;
 
 Laser3DTracking::Laser3DTracking (ros::NodeHandle* nh, const double& period)
 {
     
-    this->nh = nh;
-    this->period = period;
+    this->_nh = nh;
+    this->_period = period;
         
     // Input params
-    std::string pc_topic, image_topic, camera_info_topic, image_transport;
-    if (nh->getParam("point_cloud_topic", pc_topic)) {
+    std::string pc_topic;
+    if (_nh->getParam("point_cloud_topic", pc_topic)) {
         throw std::runtime_error("Error: point_cloud_topic param not set");
     }
-    if (nh->getParam("camera_frame", camera_frame) ) {
+    if (_nh->getParam("camera_frame", _camera_frame) ) {
         throw std::runtime_error("Error: camera_frame param not set");
     }  
 
     // Tracking Params
-    nh->param<double>("detection_confidence_threshold", detection_confidence_threshold, 0.55);
-    nh->param<double>("cloud_detection_max_sec_diff", cloud_detection_max_sec_diff, 4);
+    _nh->param<double>("detection_confidence_threshold", _detection_confidence_threshold, 0.55);
+    _nh->param<double>("cloud_detection_max_sec_diff", _cloud_detection_max_sec_diff, 4);
 
     // Output params
     std::string keypoint_topic;
-    nh->param<std::string>("keypoint_topic", keypoint_topic, "/nn_laser_spot_tracking/detection_output_keypoint");
-    nh->param<std::string>("laser_spot_frame", laser_spot_frame, "laser_spot");
+    _nh->param<std::string>("keypoint_topic", keypoint_topic, "/nn_laser_spot_tracking/detection_output_keypoint");
+    _nh->param<std::string>("laser_spot_frame", _laser_spot_frame, "laser_spot");
     
-    keypoint_sub = nh->subscribe<tpo_msgs::KeypointImage>(keypoint_topic, 10, &Laser3DTracking::keypointSubClbk, this);
+    _keypoint_sub = _nh->subscribe<nn_laser_spot_tracking::KeypointImage>(keypoint_topic, 10, &Laser3DTracking::keypointSubClbk, this);
      
     /******************* CLOUD ***************************/
-    cloud_sub = nh->subscribe<PointCloud>(pc_topic, 1, &Laser3DTracking::cloudClbk, this);
-    cloud = boost::make_shared<PointCloud>();
+    _cloud_sub = _nh->subscribe<PointCloud>(pc_topic, 1, &Laser3DTracking::cloudClbk, this);
+    _cloud = boost::make_shared<PointCloud>();
 
-    
-    _ref_T_spot.at(0).child_frame_id = laser_spot_frame;
+    _ref_T_spot.resize(2);
+    _ref_T_spot.at(0).child_frame_id = _laser_spot_frame;
     _ref_T_spot.at(0).transform.rotation.w = 1;
 
-    _ref_T_spot.at(1).child_frame_id = laser_spot_frame + "_raw";
+    _ref_T_spot.at(1).child_frame_id = _laser_spot_frame + "_raw";
     _ref_T_spot.at(1).transform.rotation.w = 1;
 
     
     /************************************************ FILTER  ***************************/
     
-    nh->param<double>("damping", _filter_damping, 1);
-    nh->param<double>("bw", _filter_bw, 9);
+    _nh->param<double>("damping", _filter_damping, 1);
+    _nh->param<double>("bw", _filter_bw, 9);
 
-    _laser_pos_filter = std::make_shared<NNLST::utils::FilterWrap<Eigen::Vector3d>>(_filter_damping, _filter_bw, period, 3);
+    _laser_pos_filter = std::make_shared<NNLST::utils::FilterWrap<Eigen::Vector3d>>(_filter_damping, _filter_bw, _period, 3);
         
     _ddr_server = std::make_unique<ddynamic_reconfigure::DDynamicReconfigure>(*nh);
     _ddr_server->registerVariable<double>("damping", _filter_damping, boost::bind(&Laser3DTracking::ddr_callback_filter_damping, this, _1), "damping", (double)0, (double)10, "laser_filter");
     _ddr_server->registerVariable<double>("bw", _filter_bw, boost::bind(&Laser3DTracking::ddr_callback_filter_bw, this, _1), "bw", (double)0, (double)50, "laser_filter");
-    _ddr_server->registerVariable<double>("detection_confidence_threshold", &detection_confidence_threshold, "Under this confidence (coming from 2d pixel image) the point is considered invalid, and no relative tf is published", 0, 1, "detection");
-    _ddr_server->registerVariable<double>("cloud_detection_max_sec_diff", &cloud_detection_max_sec_diff, "If point cloud and detection keypoint have a timestamp with difference bigger than this value, no relative tf is published", 0, 10, "detection");
+    _ddr_server->registerVariable<double>("detection_confidence_threshold", &_detection_confidence_threshold, "Under this confidence (coming from 2d pixel image) the point is considered invalid, and no relative tf is published", 0, 1, "detection");
+    _ddr_server->registerVariable<double>("cloud_detection_max_sec_diff", &_cloud_detection_max_sec_diff, "If point cloud and detection keypoint have a timestamp with difference bigger than this value, no relative tf is published", 0, 10, "detection");
     _ddr_server->publishServicesTopics();
     
 }
 
 bool Laser3DTracking::isReady() {
     
-    if (cloud->size() == 0) {
+    if (_cloud->size() == 0) {
         ROS_WARN_STREAM_ONCE("Point cloud not yet arrived...");
         return false;
     } else {
         ROS_WARN_STREAM_ONCE("... Point cloud arrived");
     }
     
-    if (keypoint_sub.getNumPublishers() < 1) {
-        ROS_WARN_STREAM_ONCE("Nobody is publishing the 2d keypoints on '"<< keypoint_sub.getTopic() << "'...");
+    if (_keypoint_sub.getNumPublishers() < 1) {
+        ROS_WARN_STREAM_ONCE("Nobody is publishing the 2d keypoints on '"<< _keypoint_sub.getTopic() << "'...");
         return false;
     } else {
-        ROS_WARN_STREAM_ONCE("Someone is publishing the 2d keypoints on '"<< keypoint_sub.getTopic() << "'...");
+        ROS_WARN_STREAM_ONCE("Someone is publishing the 2d keypoints on '"<< _keypoint_sub.getTopic() << "'...");
 
     }
     
@@ -89,17 +89,17 @@ int Laser3DTracking::run () {
 bool Laser3DTracking::sendTransformFrom2D() {
     
     {
-    const std::lock_guard<std::mutex> lock(cloud_mutex);
+    const std::lock_guard<std::mutex> lock(_cloud_mutex);
 
     //header in pcl cloud is a uint in microsecond, not a ros::Time
     ros::Time cloud_time;
-    cloud_time.fromNSec(cloud->header.stamp*1000);
+    cloud_time.fromNSec(_cloud->header.stamp*1000);
     //ROS_INFO("cloud time %s;\timage time %s", 
     //        std::to_string(cloud_time.toSec()).c_str(),
     //        std::to_string(keypoint_image.header.stamp.toSec()).c_str());
     
     
-    if (keypoint_image.confidence <= detection_confidence_threshold ){
+    if (_keypoint_image.confidence <= _detection_confidence_threshold ){
     
         //ROS_WARN("Confidence of arrived keypoint detection message is below the threshold (%s < %s)", 
         //         std::to_string(keypoint_image.confidence).c_str(), std::to_string(detection_confidence_threshold).c_str());
@@ -113,16 +113,16 @@ bool Laser3DTracking::sendTransformFrom2D() {
 //     std::cout << " pcl: " << cloud->header.stamp * 1000 << std::endl;
 //     std::cout << "timestamps" << std::endl;
 
-    if (keypoint_image.header.stamp < cloud_time) {
+    if (_keypoint_image.header.stamp < cloud_time) {
         
-        time_diff = cloud_time - keypoint_image.header.stamp;
+        time_diff = cloud_time - _keypoint_image.header.stamp;
         
-        if (time_diff.toSec() > cloud_detection_max_sec_diff) {
+        if (time_diff.toSec() > _cloud_detection_max_sec_diff) {
             ROS_WARN("keypoint is too old wrt to cloud: (%ss, %ss, diff : %ss > %ss)", 
-                    std::to_string(keypoint_image.header.stamp.toSec()).c_str(), 
+                    std::to_string(_keypoint_image.header.stamp.toSec()).c_str(), 
                     std::to_string(cloud_time.toSec()).c_str(),
                     std::to_string(time_diff.toSec()).c_str(),
-                    std::to_string(cloud_detection_max_sec_diff).c_str()
+                    std::to_string(_cloud_detection_max_sec_diff).c_str()
                     );    
             
             return false;
@@ -130,14 +130,14 @@ bool Laser3DTracking::sendTransformFrom2D() {
         
     } else {
         
-        time_diff = keypoint_image.header.stamp - cloud_time; 
+        time_diff = _keypoint_image.header.stamp - cloud_time; 
         
-        if (time_diff.toSec() > cloud_detection_max_sec_diff) {
+        if (time_diff.toSec() > _cloud_detection_max_sec_diff) {
             ROS_WARN("cloud is too old wrt to keypoint (this is strange): (%ss, %ss, diff : %ss > %ss)", 
                     std::to_string(cloud_time.toSec()).c_str(), 
-                    std::to_string(keypoint_image.header.stamp.toSec()).c_str(),
+                    std::to_string(_keypoint_image.header.stamp.toSec()).c_str(),
                     std::to_string(time_diff.toSec()).c_str(),
-                    std::to_string(cloud_detection_max_sec_diff).c_str()
+                    std::to_string(_cloud_detection_max_sec_diff).c_str()
                     );    
 
             return false;
@@ -152,30 +152,30 @@ bool Laser3DTracking::sendTransformFrom2D() {
     
     } // destroy the cloud_mutex;
     
-    tf_broadcaster.sendTransform(ref_T_spot);
+    _tf_broadcaster.sendTransform(_ref_T_spot);
  
     return true;
 }
 
 bool Laser3DTracking::updateTransform ()
 {
-    auto pointXYZ = cloud->at(keypoint_image.x_pixel, keypoint_image.y_pixel);
+    auto pointXYZ = _cloud->at(_keypoint_image.x_pixel, _keypoint_image.y_pixel);
     
     if (pointXYZ.z == 0 || std::isnan(pointXYZ.x) || std::isnan(pointXYZ.y) || std::isnan(pointXYZ.z) ) {
     
 //         ROS_ERROR("Z distance is very small, do not ignore this: x:%f, y:%f, z:%f", pointXYZ.x, pointXYZ.y, pointXYZ.z);
-//         ROS_ERROR("x_pix:%d, y_pix%d", keypoint_image.x_pixel, keypoint_image.y_pixel);
-//         ROS_ERROR("cloud index from pixels:%d\n", keypoint_image.x_pixel * cloud->width + keypoint_image.y_pixel);
+//         ROS_ERROR("x_pix:%d, y_pix%d", _keypoint_image.x_pixel, _keypoint_image.y_pixel);
+//         ROS_ERROR("cloud index from pixels:%d\n", _keypoint_image.x_pixel * _cloud->width + _keypoint_image.y_pixel);
         ROS_WARN("pixel has no corresponding pc (probably there is a hole, or the cloud has been filtered out), dropping it");
         return false;
     }
     //ROS_INFO_STREAM(pointXYZ.x << " " << pointXYZ.y << " " << pointXYZ.z);
     
     _ref_T_spot.at(0).header.stamp = ros::Time::now();
-    _ref_T_spot.at(1).header.stamp = ref_T_spot.at(0).header.stamp;
+    _ref_T_spot.at(1).header.stamp = _ref_T_spot.at(0).header.stamp;
     
-    _ref_T_spot.at(0).header.frame_id = cloud->header.frame_id;
-    _ref_T_spot.at(1).header.frame_id = cloud->header.frame_id;
+    _ref_T_spot.at(0).header.frame_id = _cloud->header.frame_id;
+    _ref_T_spot.at(1).header.frame_id = _cloud->header.frame_id;
     
     Eigen::Vector3d vec, vec_filt;
     vec << pointXYZ.x, pointXYZ.y, pointXYZ.z;
@@ -193,16 +193,16 @@ bool Laser3DTracking::updateTransform ()
 
 void Laser3DTracking::cloudClbk(const PointCloud::ConstPtr& msg)
 {
-    const std::lock_guard<std::mutex> lock(cloud_mutex);
-    *cloud = *msg;
+    const std::lock_guard<std::mutex> lock(_cloud_mutex);
+    *_cloud = *msg;
     //std::cout << cloud->header.frame_id << std::endl;
     //change reference frame
     //pcl_ros::transformPointCloud (ref_frame, *cloud, *cloud, tf_buffer);
 }
 
-void Laser3DTracking::keypointSubClbk(const tpo_msgs::KeypointImageConstPtr& msg)
+void Laser3DTracking::keypointSubClbk(const nn_laser_spot_tracking::KeypointImageConstPtr& msg)
 {
-    keypoint_image = *msg;
+    _keypoint_image = *msg;
 }
 
 void Laser3DTracking::ddr_callback_filter_damping(double new_value) {

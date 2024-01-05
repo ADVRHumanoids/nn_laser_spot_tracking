@@ -10,7 +10,7 @@
         faster_rcnn_v1_e10_b2_tvt80200_coco.pt
     -->
     <arg name="model_name" />  
-    <arg name="model_path" default="$(find nn_laser_detection)/models/"/>  
+    <arg name="model_path" default="$(find nn_laser_spot_tracking)/models/"/>  
 
     <!-- Input PARAMS -->
     <arg name="camera" />
@@ -50,7 +50,7 @@
 
 
     <!-- 2D Neural Network Detection -->
-    <node pkg="tpo_vision" name="2D_detection"
+    <node pkg="nn_laser_spot_tracking" name="2D_detection"
         type="inferNodeROS.py" output="screen" respawn="false">
         
         <param name="model_path" value="$(arg model_path)"/>
@@ -73,7 +73,7 @@
 
 
     <!-- Pixel-Point(cloud) Matching and TF broadcasting -->
-    <node pkg="tpo_vision" name="3D_tracking"
+    <node pkg="nn_laser_spot_tracking" name="3D_tracking"
         type="laser3DTracking" output="screen" respawn="false" launch-prefix="$(arg launch-prefix)">
 
         <param name="point_cloud_topic" value="/$(arg point_cloud)"/>

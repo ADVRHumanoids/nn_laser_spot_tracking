@@ -35,21 +35,21 @@ public:
     int run();
     
 private:
-    ros::NodeHandle* nh;
-    double period;
+    ros::NodeHandle* _nh;
+    double _period;
     
-    std::string camera_frame;
-    std::string ref_frame ;
-    std::string laser_spot_frame;
+    std::string _camera_frame;
+    std::string _ref_frame ;
+    std::string _laser_spot_frame;
     
-    double detection_confidence_threshold;
-    double cloud_detection_max_sec_diff;
-    ros::Subscriber keypoint_sub;
-    void keypointSubClbk(const tpo_msgs::KeypointImageConstPtr& msg);
-    tpo_msgs::KeypointImage keypoint_image;
+    double _detection_confidence_threshold;
+    double _cloud_detection_max_sec_diff;
+    ros::Subscriber _keypoint_sub;
+    void keypointSubClbk(const nn_laser_spot_tracking::KeypointImageConstPtr& msg);
+    nn_laser_spot_tracking::KeypointImage _keypoint_image;
     
     tf2_ros::TransformBroadcaster _tf_broadcaster;
-    std::array<geometry_msgs::TransformStamped,2> _ref_T_spot; //one for raw, other for filtered
+    std::vector<geometry_msgs::TransformStamped> _ref_T_spot; //one for raw, other for filtered. tf2_ros wants vector, cant use std::array
 
     ros::Subscriber _cloud_sub;
     void cloudClbk(const PointCloud::ConstPtr& msg);
@@ -62,7 +62,7 @@ private:
     bool updateTransform();
     
     /***************  FILTER    **********/
-    tpo::utils::FilterWrap<Eigen::Vector3d>::Ptr _laser_pos_filter;
+    NNLST::utils::FilterWrap<Eigen::Vector3d>::Ptr _laser_pos_filter;
     double _filter_damping, _filter_bw;
     
     std::unique_ptr<ddynamic_reconfigure::DDynamicReconfigure> _ddr_server;

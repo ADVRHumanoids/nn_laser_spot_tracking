@@ -161,6 +161,10 @@ install(DIRECTORY config/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/config
 )
 
+install(DIRECTORY training/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/training
+)
+
 
 #############
 ## Testing ##

@@ -22,7 +22,7 @@
 
 #include <memory>
 
-namespace tpo { namespace utils {
+namespace NNLST { namespace utils {
     
 template <typename SignalType>
 /**

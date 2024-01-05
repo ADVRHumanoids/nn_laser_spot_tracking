@@ -14,4 +14,4 @@ Detect (and practically track) a laser spot emitter from a common laser pointer
 - Check arguments in this launch, and launch it: `roslaunch tpo_vision laser3DTracking.launch`
 
 ## Training your how model
-- todo
+- See https://github.com/ADVRHumanoids/nn_laser_spot_tracking/tree/master/training
