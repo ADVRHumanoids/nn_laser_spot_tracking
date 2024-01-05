@@ -4,7 +4,7 @@
 Created on Fri Aug 19 10:48:52 2022
 
 @author: tori
-with spunti taken from https://github.com/vvasilo/yolov3_pytorch_ros/blob/master/src/yolov3_pytorch_ros/detector.py
+with ideas taken from https://github.com/vvasilo/yolov3_pytorch_ros/blob/master/src/yolov3_pytorch_ros/detector.py
 """
 #import sys
 import os
@@ -23,12 +23,11 @@ from cv_bridge import CvBridge, CvBridgeError
 
 # ROS imports
 import rospy
-import rospkg
 from sensor_msgs.msg import CompressedImage as ROSCompressedImage
 from sensor_msgs.msg import Image as ROSImage
 from sensor_msgs.msg import CameraInfo
 
-from tpo_msgs.msg import KeypointImage
+from nn_laser_spot_tracking.msg import KeypointImage
 
 class getCameraInfo:
     
@@ -54,7 +53,7 @@ class GenericModel :
     def __init__(self):
         pass
         
-    def initialize(self, model_path_name, device='gpu'):
+    def initialize(self, model_path_name, yolo_path="", device='gpu'):
         pass
         
     def infer(self, cv_image_input):
@@ -75,7 +74,7 @@ class NoYoloModel(GenericModel) :
         #beh = torchvision.transforms.functional.to_pil_image(self.tensor_images[0], "RGB")
        # beh.show()    
         
-    def initialize(self, model_path_name, device='gpu'):
+    def initialize(self, model_path_name, yolo_path="", device='gpu'):
         
         if device == 'cpu' :
             self.device = torch.device('cpu')
@@ -110,15 +109,15 @@ class YoloModel(GenericModel) :
     def __init__(self):
         super().__init__()
         
-    def initialize(self, model_path, device='gpu'):
+    def initialize(self, model_path, yolo_path="", device='gpu'):
 
         if device == 'cpu' :
             self.device = torch.device('cpu')
-            self.model = torch.hub.load('/home/tori/TelePhysicalOperation/YoloTutorial/yolov5', 'custom', source='local', path=model_path, force_reload=True, map_location=torch.device('cpu'))
+            self.model = torch.hub.load(yolo_path, 'custom', source='local', path=model_path, force_reload=True, map_location=torch.device('cpu'))
 
         elif device == 'gpu' :
             self.device = torch.device('cuda')
-            self.model = torch.hub.load('/home/tori/TelePhysicalOperation/YoloTutorial/yolov5', 'custom', source='local', path=model_path, force_reload=True)
+            self.model = torch.hub.load(yolo_path, 'custom', source='local', path=model_path, force_reload=True)
        
         else:
             raise Exception("Invalid device " + device)   
@@ -175,6 +174,7 @@ class DetectorManager():
         ### Input Params
         model_path = rospy.get_param('~model_path')
         model_name = rospy.get_param('~model_name')
+        yolo_path = rospy.get_param('~yolo_path', "ultralytics/yolov5")
 
         camera_image_topic = rospy.get_param('~camera_image_topic')
         self.camera_image_transport = rospy.get_param('~transport', 'compressed')
@@ -207,12 +207,12 @@ class DetectorManager():
         if torch.cuda.is_available():
             self.device = torch.device('cuda')
             rospy.loginfo("CUDA available, use GPU")
-            self.model_helper.initialize(model_path_name, 'gpu')
+            self.model_helper.initialize(model_path_name, yolo_path, 'gpu')
 
         else:
             self.device = torch.device('cpu')
             rospy.loginfo("CUDA not available, use CPU") 
-            self.model_helper.initialize(model_path_name, 'cpu')
+            self.model_helper.initialize(model_path_name, yolo_path, 'cpu')
         
         ############ ROS STUFF
         

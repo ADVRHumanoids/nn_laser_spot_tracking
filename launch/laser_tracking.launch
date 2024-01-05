@@ -11,11 +11,11 @@
     -->
     <arg name="model_name" />  
     <arg name="model_path" default="$(find nn_laser_spot_tracking)/models/"/>  
+    <arg name="yolo_path" default="ultralytics/yolov5" />
 
     <!-- Input PARAMS -->
     <arg name="camera" />
     <arg name="point_cloud" />
-    <arg name="camera_frame" />
 
     <arg name="image" default="color/image_raw"/>
     <!--  raw, compressed or theora />-->
@@ -48,13 +48,13 @@
     <arg name="rviz" default="false"/>   
 
 
-
     <!-- 2D Neural Network Detection -->
-    <node pkg="nn_laser_spot_tracking" name="2D_detection"
+    <node pkg="nn_laser_spot_tracking" name="2D_tracking"
         type="inferNodeROS.py" output="screen" respawn="false">
         
         <param name="model_path" value="$(arg model_path)"/>
         <param name="model_name" value="$(arg model_name)"/>
+        <param name="yolo_path" value="$(arg yolo_path)"/>
 
         <param name="camera_image_topic" value="/$(arg camera)/$(arg image)"/>
         <param name="transport" value="$(arg transport)"/>
@@ -73,7 +73,7 @@
 
 
     <!-- Pixel-Point(cloud) Matching and TF broadcasting -->
-    <node pkg="nn_laser_spot_tracking" name="3D_tracking"
+    <node pkg="nn_laser_spot_tracking" name="3D_matching"
         type="laser3DTracking" output="screen" respawn="false" launch-prefix="$(arg launch-prefix)">
 
         <param name="point_cloud_topic" value="/$(arg point_cloud)"/>

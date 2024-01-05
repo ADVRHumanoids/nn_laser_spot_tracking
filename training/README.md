@@ -33,4 +33,4 @@ Taken from https://github.com/ultralytics/yolov5/
 
 You can either follow the https://github.com/ultralytics/yolov5/ tutorial (Training part)
 
-OR, clone that repo somewhere and use the `MainYolo.py`. Example about how to use the MainYolo are in `TrainMain.py`
+OR, clone that repo somewhere and use the `TrainYolo.py`. Example about how to use the MainYolo are in `TrainMain.py`
