@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>nn_laser_spot_tracking</name>
+  <version>1.0.0</version>
+  <description>Detect (in practice, tracking) a laser spot coming from a pointer with a neural network</description>
+
+  <author email="toridebraus@gmail.com">Davide Torielli</author>
+  <maintainer email="toridebraus@gmail.com">Davide Torielli</maintainer>
+
+  <license>BSD</license>
+
+  <url type="website">https://github.com/ADVRHumanoids/nn_laser_spot_detection/</url>
+
+  <depend>roscpp</depend>
+  <depend>rospy</depend>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <export>
+  </export>
+</package>

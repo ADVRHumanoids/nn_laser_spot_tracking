@@ -1,0 +1,99 @@
+<?xml version="1.0"?>
+<launch>
+    
+    <env name="ROSCONSOLE_FORMAT" value="[${severity}] [${time}] [${node}] [${function}] [${line}]: ${message}"/>
+    
+    <!-- model names examples
+        fasterrcnn_mobilenet_high_e10_b4_tvt702010_laserv3.pt
+        faster_rcnn_v2_e5_b1_tvt652510_data2.pt
+        fasterrcnn_mobilenet_high_e10_b2_tvt652510_data2.pt/>
+        faster_rcnn_v1_e10_b2_tvt80200_coco.pt
+    -->
+    <arg name="model_name" />  
+    <arg name="model_path" default="$(find nn_laser_detection)/models/"/>  
+
+    <!-- Input PARAMS -->
+    <arg name="camera" />
+    <arg name="point_cloud" />
+    <arg name="camera_frame" />
+
+    <arg name="image" default="color/image_raw"/>
+    <!--  raw, compressed or theora />-->
+    <arg name="transport" default="compressed" /> 
+    <!-- <arg name="camera_info_topic" default="/$(arg camera)/color/camera_info"/> -->
+
+
+    <!-- Tracking PARAMS -->
+    <arg name="dl_rate" default="30"/>
+    <arg name="tracking_rate" default="100"/>
+    <arg name="detection_confidence_threshold" default="0.55" />
+    <arg name="cloud_detection_max_sec_diff" default="4" />
+    <!-- To filter the laser final tracked position, to smooth out possible erratic movements of the laser spot -->
+    <arg name="position_filter_enable" default="true"/>
+    <arg name="position_filter_bw" default="9"/>
+    <arg name="position_filter_damping" default="1"/>
+
+    <!-- Output PARAMS -->
+    <arg name="keypoint_topic" default="/nn_laser_spot_tracking/detection_output_keypoint" />
+    <arg name="laser_spot_frame" default="laser_spot_frame" />
+    <arg name="pub_out_images" default="true" /> <!-- Publish RGB images with rectangle on the detected laser-->
+    <arg name="pub_out_images_all_keypoints" default="false" />
+    <arg name="pub_out_images_topic" default="/detection_output_img" />
+
+
+    <!-- Other PARAMS -->
+    <arg name="gdb" default="false" />
+    <arg if="$(arg gdb)" name="launch-prefix" value="xterm -e gdb --args"/>
+    <arg unless="$(arg gdb)" name="launch-prefix" value=""/>
+    <arg name="rviz" default="false"/>   
+
+
+
+    <!-- 2D Neural Network Detection -->
+    <node pkg="tpo_vision" name="2D_detection"
+        type="inferNodeROS.py" output="screen" respawn="false">
+        
+        <param name="model_path" value="$(arg model_path)"/>
+        <param name="model_name" value="$(arg model_name)"/>
+
+        <param name="camera_image_topic" value="/$(arg camera)/$(arg image)"/>
+        <param name="transport" value="$(arg transport)"/>
+        <!-- <param name="camera_info_topic" value="$(arg camera_info_topic)"/> -->
+
+        <param name="rate" value="$(arg dl_rate)"/>
+        <!--  This is just to publish the images with a mark only if the point is above the trheshold (which is in truth checked by laser3DTracking)   -->
+        <param name="detection_confidence_threshold" value="$(arg detection_confidence_threshold)"/>
+        
+        <param name="pub_out_keypoint_topic" value="$(arg keypoint_topic)"/>
+        <param name="pub_out_images" value="$(arg pub_out_images)"/>
+        <param name="pub_out_images_all_keypoints" value="$(arg pub_out_images_all_keypoints)"/>
+        <param name="pub_out_images_topic" value="$(arg pub_out_images_topic)"/>
+        
+    </node>
+
+
+    <!-- Pixel-Point(cloud) Matching and TF broadcasting -->
+    <node pkg="tpo_vision" name="3D_tracking"
+        type="laser3DTracking" output="screen" respawn="false" launch-prefix="$(arg launch-prefix)">
+
+        <param name="point_cloud_topic" value="/$(arg point_cloud)"/>
+        <param name="camera_frame" value="$(arg camera_frame)"/>
+
+        <param name="rate" value="$(arg tracking_rate)"/>
+        
+        <param name="detection_confidence_threshold" value="$(arg detection_confidence_threshold)"/>
+        <param name="cloud_detection_max_sec_diff" value="$(arg cloud_detection_max_sec_diff)"/>
+        
+        <param name="keypoint_topic" value="$(arg keypoint_topic)"/>
+        <param name="laser_spot_frame" value="$(arg laser_spot_frame)"/>
+                    
+        <param name="filter_enable" value="$(arg position_filter_enable)"/>
+        <param name="bw" value="$(arg position_filter_bw)"/>
+        <param name="damping" value="$(arg position_filter_damping)"/>
+        
+    </node>
+        
+    <node if="$(arg rviz)" type="rviz" name="rviz" pkg="rviz" args="-d $(find nn_laser_detection)/config/rviz/rviz.rviz" >
+    </node> 
+  
+</launch>
