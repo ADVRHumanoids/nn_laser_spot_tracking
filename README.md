@@ -1,5 +1,5 @@
 # nn_laser_spot_detection
-Detect (and practically track) a laser spot emitter from a common laser pointer.  
+Detect (and practically track) in the ROS world a laser spot emitted from a common laser pointer.  
 
 
 ## Requirments:
