@@ -49,7 +49,7 @@
 
 
     <!-- 2D Neural Network Detection -->
-    <node pkg="nn_laser_spot_tracking" name="2D_tracking"
+    <node pkg="nn_laser_spot_tracking" name="tracking_2D"
         type="inferNodeROS.py" output="screen" respawn="false">
         
         <param name="model_path" value="$(arg model_path)"/>
@@ -73,7 +73,7 @@
 
 
     <!-- Pixel-Point(cloud) Matching and TF broadcasting -->
-    <node pkg="nn_laser_spot_tracking" name="3D_matching"
+    <node pkg="nn_laser_spot_tracking" name="matching_3D"
         type="laser3DTracking" output="screen" respawn="false" launch-prefix="$(arg launch-prefix)">
 
         <param name="point_cloud_topic" value="/$(arg point_cloud)"/>
