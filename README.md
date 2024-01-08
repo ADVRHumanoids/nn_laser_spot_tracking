@@ -20,7 +20,7 @@ The 2D_detection node will subscribe to `/$(arg camera)/$(arg image)/$(arg trans
 The 3D_tracking to `/$(arg point_cloud)`
 A TF will be broadcasted to the ROS tf tree from the point cloud reference to the `$(arg laser_spot_frame)`.
 
-- Indentify the model/weights you want. Three are provided here [TODO](). In any case they should have been trained on laser spots, obviously. Put the model you want to use in a folder, `models` folder of this repo is the default.
+- Indentify the model/weights you want. Some are provided at [https://zenodo.org/records/10471835](https://zenodo.org/records/10471835). In any case they should have been trained on laser spots, obviously. Put the model you want to use in a folder, `models` folder of this repo is the default.
 
 - [Optional, but suggested] If Yolov5 is used, better to clone their [repo](https://github.com/ultralytics/yolov5/), and provide its path to the `yolo_path` argument. Otherwise, pytorch will download it every time (since the default is "ultralytics/yolov5"). If cloning, go in the folder and install the requirments: `pip install -r requirements.txt`.
 
@@ -58,6 +58,10 @@ These are settable online with a [ddynamic reconfigure](https://github.com/pal-r
 
 ## Training new models
 - See https://github.com/ADVRHumanoids/nn_laser_spot_tracking/tree/master/training
+
+## Data
+- Image dataset: [https://zenodo.org/records/10471811](https://zenodo.org/records/10471811)
+- Trained models: [https://zenodo.org/records/10471835](https://zenodo.org/records/10471835)
 
 ## Paper
 TODO
