@@ -9,6 +9,8 @@ Detect (and practically track) in the ROS world a laser spot emitted from a comm
 - It should work on cpu only pc, but gpu (only nvidia) is preferrable
 - Pytorch with matching version of cuda. conda (please miniconda) can be used but I probably you have to install also ros in the environent to run all
 - ROS (1) 
+- If using yolov5, their requirments (see setup and running)
+
 
 ## Setup and running
 The tracking comprises two main nodes: 2D_detection for 2D neural network detection and 3D_matching for pixel-point matching and TF broadcasting.  
@@ -20,7 +22,7 @@ A TF will be broadcasted to the ROS tf tree from the point cloud reference to th
 
 - Indentify the model/weights you want. Three are provided here [TODO](). In any case they should have been trained on laser spots, obviously. Put the model you want to use in a folder, `models` folder of this repo is the default.
 
-- [Optional, but suggested] If Yolov5 is used, better to clone their [repo](https://github.com/ultralytics/yolov5/), and provide its path to the `yolo_path` argument. Otherwise, pytorch will download it every time (since the default is "ultralytics/yolov5"). 
+- [Optional, but suggested] If Yolov5 is used, better to clone their [repo](https://github.com/ultralytics/yolov5/), and provide its path to the `yolo_path` argument. Otherwise, pytorch will download it every time (since the default is "ultralytics/yolov5"). If cloning, go in the folder and install the requirments: `pip install -r requirements.txt`.
 
 - Run the launch file: 
   `roslaunch tpo_vision laser3DTracking.launch model_name:=<> camera:=<> point_cloud:=<>`

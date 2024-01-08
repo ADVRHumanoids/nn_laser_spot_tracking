@@ -76,7 +76,7 @@
     <node pkg="nn_laser_spot_tracking" name="matching_3D"
         type="laser3DTracking" output="screen" respawn="false" launch-prefix="$(arg launch-prefix)">
 
-        <param name="point_cloud_topic" value="/$(arg point_cloud)"/>
+        <param name="point_cloud_topic" value="$(arg point_cloud)"/>
 
         <param name="rate" value="$(arg tracking_rate)"/>
         

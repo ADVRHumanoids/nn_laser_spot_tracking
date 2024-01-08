@@ -404,7 +404,7 @@ class DetectorManager():
 
 if __name__=="__main__":
     # Initialize node
-    rospy.init_node("2D_tracking")
+    rospy.init_node("tracking_2D")
     
     rate_param = rospy.get_param('~rate', 5)
 

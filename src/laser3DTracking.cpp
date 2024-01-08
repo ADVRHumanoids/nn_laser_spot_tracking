@@ -10,7 +10,7 @@ Laser3DTracking::Laser3DTracking (ros::NodeHandle* nh, const double& period)
         
     // Input params
     std::string pc_topic;
-    if (_nh->getParam("point_cloud_topic", pc_topic)) {
+    if (! _nh->getParam("point_cloud_topic", pc_topic)) {
         throw std::runtime_error("Error: point_cloud_topic param not set");
     }
 
@@ -245,7 +245,7 @@ void Laser3DTracking::cameraInfoClbk(const sensor_msgs::CameraInfoConstPtr& msg)
 
 int main ( int argc, char **argv ) {
 
-    ros::init ( argc, argv, "3D_matching" );
+    ros::init ( argc, argv, "matching_3D" );
     ros::NodeHandle nh("~");
     
     double rate;
