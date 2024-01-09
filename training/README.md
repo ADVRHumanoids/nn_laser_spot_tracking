@@ -4,7 +4,7 @@ Training part is done by adapting tutorials and repos around the web, so some ad
 dowloaded as per instructions
 
 ## Dataset
-Laser spot annotated image dataset is availalbe at <TODO>
+Laser spot annotated image dataset is available at [https://zenodo.org/records/10471811](https://zenodo.org/records/10471811)  
 Two formats are given:
 - COCO format (for non-yolo models) as:
   - a folder containing images and annotation folders.    
