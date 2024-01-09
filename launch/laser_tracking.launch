@@ -35,7 +35,7 @@
 
     <!-- Output PARAMS -->
     <arg name="keypoint_topic" default="/nn_laser_spot_tracking/detection_output_keypoint" />
-    <arg name="laser_spot_frame" default="laser_spot_frame" />
+    <arg name="laser_spot_frame" default="laser" />
     <arg name="pub_out_images" default="true" /> <!-- Publish RGB images with rectangle on the detected laser-->
     <arg name="pub_out_images_all_keypoints" default="false" />
     <arg name="pub_out_images_topic" default="/detection_output_img" />
