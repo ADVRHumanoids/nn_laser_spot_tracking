@@ -9,7 +9,7 @@
 
   <license>BSD</license>
 
-  <url type="website">https://github.com/ADVRHumanoids/nn_laser_spot_detection/</url>
+  <url type="website">https://github.com/ADVRHumanoids/nn_laser_spot_tracking/</url>
 
   <depend>roscpp</depend>
   <depend>rospy</depend>

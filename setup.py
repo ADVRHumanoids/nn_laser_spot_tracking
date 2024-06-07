@@ -5,8 +5,8 @@ from catkin_pkg.python_setup import generate_distutils_setup
 
 # fetch values from package.xml
 setup_args = generate_distutils_setup(
-packages=['nn_laser_spot_detection'],
-    package_dir={'': 'scripts'},
+    # packages=['nn_laser_spot_tracking'],
+    # package_dir={'': 'src'},
 )
 
 setup(**setup_args)
