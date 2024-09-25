@@ -64,4 +64,16 @@ These are settable online with a [ddynamic reconfigure](https://github.com/pal-r
 - Trained models: [https://zenodo.org/records/10471835](https://zenodo.org/records/10471835)
 
 ## Paper
-TODO
+[https://ieeexplore.ieee.org/document/10602529](https://ieeexplore.ieee.org/document/10602529)
+```
+@ARTICLE{10602529,
+  author={Torielli, Davide and Bertoni, Liana and Muratore, Luca and Tsagarakis, Nikos},
+  journal={IEEE Robotics and Automation Letters}, 
+  title={A Laser-Guided Interaction Interface for Providing Effective Robot Assistance to People With Upper Limbs Impairments}, 
+  year={2024},
+  volume={9},
+  number={9},
+  pages={7653-7660},
+  keywords={Robots;Lasers;Task analysis;Keyboards;Magnetic heads;Surface emitting lasers;Grippers;Human-robot collaboration;physically assistive devices;visual servoing},
+  doi={10.1109/LRA.2024.3430709}}
+```
