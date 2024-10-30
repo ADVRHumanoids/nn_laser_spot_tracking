@@ -25,7 +25,7 @@ A TF will be broadcasted to the ROS tf tree from the point cloud reference to th
 - [Optional, but suggested] If Yolov5 is used, better to clone their [repo](https://github.com/ultralytics/yolov5/), and provide its path to the `yolo_path` argument. Otherwise, pytorch will download it every time (since the default is "ultralytics/yolov5"). If cloning, go in the folder and install the requirments: `pip install -r requirements.txt`.
 
 - Run the launch file: 
-  `roslaunch nn_laser_spot_tracking laser3DTracking.launch model_name:=<> camera:=<> point_cloud:=<>`
+  `roslaunch nn_laser_spot_tracking laser_tracking.launch model_name:=<> camera:=<> point_cloud:=<>`
 
 ### Launch File Arguments
 #### Required
