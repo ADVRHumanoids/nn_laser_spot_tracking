@@ -33,9 +33,18 @@ cocoTrain=COCO('/home/tori/YOLO/data/instances_train2017.json')
 cocoVal=COCO('/home/tori/YOLO/data/instances_val2017.json')
 
 img_folder = "/home/tori/YOLO/data/yolo_images/"
+output_name = "/home/tori/YOLO/data/coco_subset"
+
+#laser is 309/76 (80/20)
+
+#for each category, it is assured that AT LEAST this number of occurencies exist
+# (because on same image multiple categories can be present, and also multiple occurencies
+# of same category)
+N_sample_train = 500
+N_sample_valid = 100
 
 def COCONames_to_COCOId(coco, COCO_name):
-    return coco.getCatIds(catNms=[COCO_name])[0];
+    return coco.getCatIds(catNms=[COCO_name])[0]
 
 def COCOId_to_COCONames(coco, COCO_id):
   cats = coco.loadCats(coco.getCatIds())
@@ -197,15 +206,7 @@ my_categories = {
     "toothbrush": 18,
 }
 
-#laser is 309/76 (80/20)
 
-#for each category, it is assured that AT LEAST this number of occurencies exist
-# (because on same image multiple categories can be present, and also multiple occurencies
-# of same category)
-N_sample_train = 400
-N_sample_valid = 100
-
-output_name = "./coco_subset"
 
 # get all images containing given categories, select at random
 
