@@ -22,7 +22,7 @@ img_size = args.img_size
 batch_size = args.batch
 epochs = args.epochs
 
-model_out_name = (args.weights + "_" + data_file + "_e" + str(epochs) + "_b" + str(batch_size) + str(int(time.time())))
+model_out_name = (args.weights + "_" + data_file + "_e" + str(epochs) + "_b" + str(batch_size) + "_" + str(int(time.time())))
 # Load a model
 model = YOLO(weights+".pt")
 

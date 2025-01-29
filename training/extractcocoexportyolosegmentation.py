@@ -32,8 +32,12 @@ pylab.rcParams['figure.figsize'] = (8.0, 10.0)
 cocoTrain=COCO('/home/tori/YOLO/data/instances_train2017.json')
 cocoVal=COCO('/home/tori/YOLO/data/instances_val2017.json')
 
+# YOLOV11 format is different if detection or segmentation is used:
+# det: label, center-x, center-y, widht, height
+# seg: label, x1, y1, ..., xn, yn
+model_type = "seg" #det or seg
 img_folder = "/home/tori/YOLO/data/yolo_images/"
-output_name = "/home/tori/YOLO/data/coco_subset"
+output_name = "/home/tori/YOLO/data/coco_subset_19" + "_" + model_type
 
 #laser is 309/76 (80/20)
 
@@ -41,7 +45,52 @@ output_name = "/home/tori/YOLO/data/coco_subset"
 # (because on same image multiple categories can be present, and also multiple occurencies
 # of same category)
 N_sample_train = 500
-N_sample_valid = 100
+N_sample_valid = 110
+
+
+my_categories = {
+    "person": 0,
+    "sports ball": 1,
+    "bottle": 2,
+    "wine glass": 3,
+    "cup": 4,
+    "fork": 5,
+    "knife": 6,
+    "spoon": 7,
+    "bowl": 8,
+    "banana": 9,
+    "apple": 10,
+    "sandwich": 11,
+    "orange": 12,
+    "carrot": 13,
+    "book": 14,
+    "clock": 15,
+    "vase": 16,
+    "scissors": 17,
+    "toothbrush": 18,
+}
+
+# my_categories = {
+#     "sports ball": 0,
+#     "bottle": 1,
+#     "wine glass": 2,
+#     "cup": 3,
+#     "fork": 4,
+#     "knife": 5,
+#     "spoon": 6,
+#     "bowl": 7,
+#     "banana": 8,
+#     "apple": 9,
+#     "sandwich": 10,
+#     "orange": 11,
+#     "carrot": 12,
+#     "book": 13,
+#     "clock": 14,
+#     "vase": 15,
+#     "scissors": 16,
+#     "toothbrush": 17,
+# }
+
 
 def COCONames_to_COCOId(coco, COCO_name):
     return coco.getCatIds(catNms=[COCO_name])[0]
@@ -65,11 +114,17 @@ def convert_coco_to_yolo(coco, img_ids, output_labels_dir):
         label_file = label_file_path.with_suffix(".txt")
         with open(label_file, 'w+') as f:
             for ann in annotations:
-                category_id = ann['category_id']
-                if not category_id in catIds:
-                  continue
+
+              category_id = ann['category_id']
+              if not category_id in catIds:
+                continue
+
+              line = ''
+              if model_type == "det":
                 bbox = ann['bbox']
-                segmentation = ann['segmentation']
+                if not isinstance(bbox, list): 
+                  print(f"WARN: request box but image {img_info['file_name']} has no bbox in json!")
+                  continue
 
                 x = bbox[0]
                 y = bbox[1]
@@ -92,40 +147,46 @@ def convert_coco_to_yolo(coco, img_ids, output_labels_dir):
                 w = format(w, '.6f')
                 h = format(h, '.6f')
 
-                # Since YOLO train wants cat from 0 to N, we have to remap
-                new_category_id = my_categories[COCOId_to_COCONames(cocoTrain, category_id)]
+                line = f"{x_centre} {y_centre} {w} {h}"
 
-                f.write(f"{new_category_id} {x_centre} {y_centre} {w} {h} ")
-                #If segmentation exists, append the polygons (optional)
-                if isinstance(segmentation, list):  # Polygons
+              elif model_type == "seg":
+                segmentation_list = ann['segmentation']
 
-                  segmentation_points_list = []
-                  for segmentation in ann['segmentation']:
+                if not isinstance(segmentation_list, list):
+                  print(f"WARN: Image {img_info['file_name']} may be iscrowd for ann {ann['id']} of cat {category_id}, ignoring such annotation")
+                  continue  
 
-                    # segmentation_points = [str(\
-                    #   float(point) / (img_info['width']-1) if i % 2 == 0 \
-                    #   else float(point) / (img_info['height']-1)) \
-                    #   for i, point in enumerate(segmentation)]
+                segmentation_points_list = []
+                for segmentation in segmentation_list:
 
-                    #cap to 1.0 so yolo does not complain
-                    segmentation_points = [
-                        str(min(float(point) / (img_info['width'] - 1), 1.0)) if i % 2 == 0
-                        else str(min(float(point) / (img_info['height'] - 1), 1.0))
-                        for i, point in enumerate(segmentation)
-                    ]
-                    
-                    segmentation_points_list.append(' '.join(segmentation_points))
-                    segmentation_points_string = ' '.join(segmentation_points_list)
-                    line = '{} '.format(segmentation_points_string)
-                    f.write(line)
-                    segmentation_points_list.clear()
-                  f.write(f"\n")
-                else:
-                  f.write(f"\n")
+                  # segmentation_points = [str(\
+                  #   float(point) / (img_info['width']-1) if i % 2 == 0 \
+                  #   else float(point) / (img_info['height']-1)) \
+                  #   for i, point in enumerate(segmentation)]
+
+                  #cap to 1.0 so yolo does not complain
+                  segmentation_points = [
+                      str(min(float(point) / (img_info['width'] - 1), 1.0)) if i % 2 == 0
+                      else str(min(float(point) / (img_info['height'] - 1), 1.0))
+                      for i, point in enumerate(segmentation)
+                  ]
+                  
+                  segmentation_points_list.append(' '.join(segmentation_points))
+                  segmentation_points_string = ' '.join(segmentation_points_list)
+                  line = '{} '.format(segmentation_points_string)
+                  segmentation_points_list.clear()
+
+              else:
+                print(f"ERROR: model_type can be only 'det' or 'seg', given {model_type}")
+                return
+
+              # Since YOLO train wants cat from 0 to N, we have to remap
+              new_category_id = my_categories[COCOId_to_COCONames(cocoTrain, category_id)]
+              f.write(f"{new_category_id} {line}\n")
 
 
 def get_ids(coco, cat_names, N):
-  catIds = coco.getCatIds(cat_names);
+  catIds = coco.getCatIds(cat_names)
   imgIds = []
   for cat in catIds:
     imgIdsAll = coco.getImgIds(catIds=cat)
@@ -182,31 +243,6 @@ def download_copy_images_pool(imgs_folder, output_img_dir, coco, img_ids, pool_c
   bar.finish()
   pool.close()
   pool.join()
-
-############# PARMAETERS
-my_categories = {
-    "person": 0,
-    "sports ball": 1,
-    "bottle": 2,
-    "wine glass": 3,
-    "cup": 4,
-    "fork": 5,
-    "knife": 6,
-    "spoon": 7,
-    "bowl": 8,
-    "banana": 9,
-    "apple": 10,
-    "sandwich": 11,
-    "orange": 12,
-    "carrot": 13,
-    "book": 14,
-    "clock": 15,
-    "vase": 16,
-    "scissors": 17,
-    "toothbrush": 18,
-}
-
-
 
 # get all images containing given categories, select at random
 
@@ -286,6 +322,7 @@ yaml_to_dump = {
 with open(output_dir + "/data.yaml", "w+") as outfile:
     yaml.dump(yaml_to_dump, outfile, default_flow_style=False)
 
+print(f"Done and stored in {output_dir}")
 
 
 """Download"""

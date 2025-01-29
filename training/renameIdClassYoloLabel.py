@@ -3,8 +3,16 @@ from pathlib import Path
 
 # Directory containing YOLO label files
 label_dirs = [
+    '/home/tori/YOLO/data/det_laser_yolo_1280/train/labels',
+    '/home/tori/YOLO/data/det_laser_yolo_1280/valid/labels',    
+    '/home/tori/YOLO/data/seg_laser_nicla_640/train/labels',
+    '/home/tori/YOLO/data/seg_laser_nicla_640/valid/labels',    
+    '/home/tori/YOLO/data/seg_laser_yolo_320/train/labels',
+    '/home/tori/YOLO/data/seg_laser_yolo_320/valid/labels',    
+    '/home/tori/YOLO/data/seg_laser_yolo_640/train/labels',
+    '/home/tori/YOLO/data/seg_laser_yolo_640/valid/labels',    
     '/home/tori/YOLO/data/seg_laser_yolo_1280/train/labels',
-    '/home/tori/YOLO/data/seg_laser_yolo_1280/valid/labels',
+    '/home/tori/YOLO/data/seg_laser_yolo_1280/valid/labels',    
     ]
 
 # New class ID to replace '0'
