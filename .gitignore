@@ -4,3 +4,4 @@
 *.pt
 *.vscode
 training/runs
+*.egg-info
