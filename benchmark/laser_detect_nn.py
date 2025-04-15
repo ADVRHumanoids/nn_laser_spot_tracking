@@ -249,23 +249,30 @@ if __name__=="__main__":
 
         for i, bb in enumerate(yolo_bboxes):
 
-            # print("type of bb: ", type(bb))
-            # print("type of img_id: ", type(img_id))
-            # print("type of labels: ", type(labels))
-            # print("type of scores: ", type(scores))
-            # print("type of detections: ", type(detections))
-
             bb_cpu = bb.detach().cpu().numpy().tolist()
             labels_cpu = labels.detach().cpu().numpy().tolist()
-            scores_cpu = scores.detach().cpu().numpy().tolist()
+            scores_cpu = scores[i].detach().cpu().numpy().tolist()
 
             detections.append({
                 "image_id": img_id,
                 "category_id": 1,
                 "bbox": [round(bb_cpu[0],2), round(bb_cpu[1],2), round(bb_cpu[2]-bb_cpu[0],2), round(bb_cpu[3]-bb_cpu[1],2)],
                 #"score": 1.0, #others method have no score so 1 for everyone?
-                "score": scores_cpu[i],
-            })
+                "score": scores_cpu,
+            })        
+
+        # if len(yolo_bboxes) > 0:
+
+        #     bb_cpu = yolo_bboxes[best_index].detach().cpu().numpy().tolist()
+        #     scores_cpu = scores[best_index].detach().cpu().numpy().tolist()
+
+        #     detections.append({
+        #         "image_id": img_id,
+        #         "category_id": 1,
+        #         "bbox": [round(bb_cpu[0],2), round(bb_cpu[1],2), round(bb_cpu[2]-bb_cpu[0],2), round(bb_cpu[3]-bb_cpu[1],2)],
+        #         #"score": 1.0, #others method have no score so 1 for everyone?
+        #         "score": scores_cpu,
+        #     })
 
         det_times.append({
             "image_id": img_id,
@@ -274,6 +281,8 @@ if __name__=="__main__":
         mean_det_time += det_time
 
     cv2.destroyAllWindows()
+
+    print(f"Mean time: {round(mean_det_time/len(coco.getImgIds()),6)}")
 
     with open("results/" + dataset_name+"_"+model_name+"_detections.json", 'w') as f:
         json.dump(detections, f)   

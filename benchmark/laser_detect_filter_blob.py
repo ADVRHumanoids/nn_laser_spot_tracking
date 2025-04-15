@@ -95,7 +95,6 @@ class LaserTracker(object):
                        1)
                 
             print(f'time: ' + str(detect_time))
-            cv2.imshow('Original Image', frame)
             cv2.imshow('im_with_keypoints', im_with_keypoints)
             thresholded_img_with_keypoints = cv2.drawKeypoints(self.thresholded_img, self.keypoints, numpy.array([]), (0,255,0), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
             cv2.imshow('thresholded_img_with_keypoints', thresholded_img_with_keypoints)
@@ -125,7 +124,6 @@ class LaserTracker(object):
         sys.stdout.write("Using OpenCV version: {0}\n".format(cv2.__version__))
 
         # create output windows
-        self.create_and_position_window('Original Image', 0, 0)
         self.create_and_position_window('im_with_keypoints',
                                         10 + self.cam_width, 0)        
         self.create_and_position_window('thresholded_img_with_keypoints',
@@ -172,6 +170,8 @@ if __name__ == '__main__':
         mean_det_time += det_time
 
     cv2.destroyAllWindows()
+
+    print(f"Mean time: {round(mean_det_time/len(coco.getImgIds()),6)}")
 
     with open("results/" + dataset_name+"_"+model_name+"_detections.json", 'w') as f:
         json.dump(detections, f)   
