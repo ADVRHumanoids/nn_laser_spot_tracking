@@ -5,3 +5,5 @@
 *.vscode
 training/runs
 *.egg-info
+benchmark/results/*
+!/benchmark/results/.gitkeep

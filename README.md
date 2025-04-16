@@ -57,10 +57,13 @@ These are settable online with a [ddynamic reconfigure](https://github.com/pal-r
 - **`rviz`** (default: false): Launch RViz visualization.
 
 ## Training new models
-- See https://github.com/ADVRHumanoids/nn_laser_spot_tracking/tree/master/training
+- See [training](training) folder
+
+## Testing/compaing models
+- See [benchmark](benchmark) folder
 
 ## Data
-- Image dataset: [https://zenodo.org/records/10471811](https://zenodo.org/records/10471811)
+- Image dataset: [https://zenodo.org/records/15230870](https://zenodo.org/records/15230870)
 - Trained models: [https://zenodo.org/records/10471835](https://zenodo.org/records/10471835)
 
 ## Paper
