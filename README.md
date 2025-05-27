@@ -67,6 +67,22 @@ These are settable online with a [ddynamic reconfigure](https://github.com/pal-r
 - Trained models: [https://zenodo.org/records/10471835](https://zenodo.org/records/10471835)
 
 ## Paper
+[https://www.sciencedirect.com/science/article/pii/S092188902500140X](https://www.sciencedirect.com/science/article/pii/S092188902500140X)
+```
+@article{TORIELLI2025105054,
+title = {An intuitive tele-collaboration interface exploring laser-based interaction and behavior trees},
+journal = {Robotics and Autonomous Systems},
+pages = {105054},
+year = {2025},
+issn = {0921-8890},
+doi = {https://doi.org/10.1016/j.robot.2025.105054},
+url = {https://www.sciencedirect.com/science/article/pii/S092188902500140X},
+author = {Davide Torielli and Luca Muratore and Nikos Tsagarakis},
+keywords = {Human–robot interface, Human-centered robotics, Visual servoing, Motion planning},
+}
+```
+
+
 [https://ieeexplore.ieee.org/document/10602529](https://ieeexplore.ieee.org/document/10602529)
 ```
 @ARTICLE{10602529,
