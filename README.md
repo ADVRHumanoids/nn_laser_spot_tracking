@@ -62,9 +62,22 @@ These are settable online with a [ddynamic reconfigure](https://github.com/pal-r
 ## Testing/compaing models
 - See [benchmark](benchmark) folder
 
-## Data
-- Image dataset: [https://zenodo.org/records/15230870](https://zenodo.org/records/15230870)
-- Trained models: [https://zenodo.org/records/10471835](https://zenodo.org/records/10471835)
+## Image dataset: 
+Available at [https://zenodo.org/records/15230870](https://zenodo.org/records/15230870)
+Two formats are given:
+- COCO format (for non-yolo models) as:
+  - a folder containing images and annotation folders.    
+    - in images, all the images (not divided by train, val, test, this is done by the code)
+    - in annotations, an instances_default.json file 
+
+- YOLOv5 pytorch format for YOLOV5 model
+  - a folder containing data.yaml file which points to two folders in the same location:
+    - train
+    - valid
+    Both have images and labels folders
+
+## Trained models: 
+Available at [https://zenodo.org/records/10471835](https://zenodo.org/records/10471835)
 
 ## Paper
 [https://www.sciencedirect.com/science/article/pii/S092188902500140X](https://www.sciencedirect.com/science/article/pii/S092188902500140X)
