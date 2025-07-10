@@ -57,7 +57,7 @@ These are settable online with a [ddynamic reconfigure](https://github.com/pal-r
 - **`rviz`** (default: false): Launch RViz visualization.
 
 ## Training new models
-- See [training](training) folder
+- See [hhcm_yolo_training](https://github.com/ADVRHumanoids/hhcm_yolo_training) repo
 
 ## Testing/compaing models
 - See [benchmark](benchmark) folder
